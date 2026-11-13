@@ -37,6 +37,8 @@ export type {
   SortDirective,
 } from './list-query.ts'
 export { LIST_QUERY_LIMITS } from './list-query.ts'
+export type { LogError, LogFields, Logger, LogLevel, LogRecord } from './logger.ts'
+export { LOG_LEVEL_SEVERITY, LOG_LEVELS } from './logger.ts'
 export type {
   ActionDescriptor,
   FieldDescriptor,
@@ -49,8 +51,8 @@ export type {
 } from './manifest.ts'
 export { MANIFEST_PATH, MANIFEST_VERSION } from './manifest.ts'
 export type { Decision, PermissionProvider, ResourceRef } from './permission.ts'
-export type { Problem, ProblemCode } from './problem.ts'
-export { PROBLEM_CONTENT_TYPE } from './problem.ts'
+export type { IssueParam, Problem, ProblemCode, ValidationIssue } from './problem.ts'
+export { PROBLEM_CODES, PROBLEM_CONTENT_TYPE } from './problem.ts'
 export type {
   ActorRef,
   AndFilter,
@@ -86,5 +88,13 @@ export type {
   StandardSchemaV1SuccessResult,
   StandardSchemaV1Types,
 } from './standard-schema.ts'
+export type {
+  FileBody,
+  FileListPage,
+  FileVisibility,
+  PutOptions,
+  StorageDisk,
+  StoredFile,
+} from './storage.ts'
 export type { TenantContext, TenantStrategy } from './tenancy.ts'
 export { TENANT_STRATEGIES } from './tenancy.ts'
