@@ -10,7 +10,9 @@ It is one repo of the **Strutvane** polyrepo ecosystem (one GitHub repo per pack
 
 ## Status
 
-- **Phase: design / pre-implementation.** There is no source code yet. Do not start implementing unless the user explicitly asks.
+- **Phase 0: v0 draft implemented** (`src/*.ts`), tested (`test/`, incl. type tests) and green on `pnpm run ci`. Not released yet (npm has only a placeholder). Changes follow RFC-0001 (`../../docs/rfcs/0001-contracts-v0.md`).
+- Commands: `corepack pnpm@12.18.0 run ci` (must pass before any commit).
+- Synced files (`tsconfig.base.json`, `biome.base.json`, `vitest.shared.ts`, `.github/workflows/*`, `.gitattributes`, `.gitignore`, `.editorconfig`) come from strutvane-tooling. Never edit them here.
 - The source of truth for decisions is `../../docs/00-executive-summary.md` (D1–D20). If anything here conflicts with it, that file wins.
 - The package spec is `../../docs/04-architecture.md` (online: https://github.com/vishwajit-vm/strutvane/blob/main/docs/04-architecture.md).
 

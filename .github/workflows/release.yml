@@ -1,0 +1,65 @@
+# Managed by strutvane-tooling (canonical/.github/workflows/release.yml). Do not edit in package repos:
+# change it in strutvane-tooling and run `pnpm sync` there.
+#
+# Release flow (Changesets):
+#   1. Contributors add a changeset (`pnpm changeset`) with their PR.
+#   2. On main, this workflow opens/updates a "chore: release" PR that bumps versions + changelogs.
+#   3. Merging that PR publishes to npm using npm TRUSTED PUBLISHING (GitHub OIDC). No npm token is
+#      stored anywhere, and every release gets a provenance attestation.
+# One-time setup per package on npmjs.com: Package settings → Trusted publishing → GitHub Actions,
+#   owner `vishwajit-vm`, repository `<this repo>`, workflow `release.yml`.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository_owner == 'vishwajit-vm'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # push version commits / tags
+      pull-requests: write # open the release PR
+      id-token: write # npm trusted publishing (OIDC) + provenance
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+      - name: Set up Node 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Quality gate (never publish a broken build)
+        run: pnpm run ci
+
+      - name: Version PR or publish
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          version: pnpm run version-packages
+          publish: pnpm run release
+          commit: "chore: release"
+          title: "chore: release"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
