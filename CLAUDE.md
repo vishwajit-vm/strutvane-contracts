@@ -6,13 +6,13 @@ Project memory for Claude Code in this repository. Keep this file short, accurat
 
 Shared TypeScript types and wire protocols that let Strutvane packages integrate without depending on each other: Actor, Tenant, Permission, QueryFilter, ListQuery, ResourceManifest, Problem, AuditEvent and more. Zero runtime dependencies.
 
-It is one repo of the **Strutvane** polyrepo ecosystem (one GitHub repo per package; see ADR-0002). The hub with the full blueprint is https://github.com/vishwajitvm/strutvane. Locally it is the umbrella folder two levels up: `../../docs/`.
+It is one repo of the **Strutvane** polyrepo ecosystem (one GitHub repo per package; see ADR-0002). The hub with the full blueprint is https://github.com/vishwajit-vm/strutvane. Locally it is the umbrella folder two levels up: `../../docs/`.
 
 ## Status
 
 - **Phase: design / pre-implementation.** There is no source code yet. Do not start implementing unless the user explicitly asks.
 - The source of truth for decisions is `../../docs/00-executive-summary.md` (D1–D20). If anything here conflicts with it, that file wins.
-- The package spec is `../../docs/04-architecture.md` (online: https://github.com/vishwajitvm/strutvane/blob/main/docs/04-architecture.md).
+- The package spec is `../../docs/04-architecture.md` (online: https://github.com/vishwajit-vm/strutvane/blob/main/docs/04-architecture.md).
 
 ## Boundaries (non-negotiable)
 
