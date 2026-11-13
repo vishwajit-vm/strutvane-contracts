@@ -18,6 +18,8 @@ export type {
   FieldChange,
 } from './events.ts'
 export type { ColumnSpec, FieldType, SqlDialect } from './field-type.ts'
+export type { HttpRequestHookPayload, HttpResponseHookPayload } from './http-hooks.ts'
+export { HTTP_HOOKS } from './http-hooks.ts'
 export type {
   EnvVar,
   InstallConfig,
