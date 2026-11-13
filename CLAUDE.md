@@ -2,6 +2,12 @@
 
 Project memory for Claude Code in this repository. Keep this file short, accurate and current.
 
+## Ecosystem memory (shared by every Strutvane repo)
+
+The file below is synced from strutvane-tooling and is identical in every repo. It covers how the whole ecosystem fits together: repo map, decisions, connection rules, standards, workflow and current status. Read it before changing anything.
+
+@.claude/ECOSYSTEM.md
+
 ## What this repo is
 
 Shared TypeScript types and wire protocols that let Strutvane packages integrate without depending on each other: Actor, Tenant, Permission, QueryFilter, ListQuery, ResourceManifest, Problem, AuditEvent and more. Zero runtime dependencies.
