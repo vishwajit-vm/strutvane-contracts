@@ -28,11 +28,12 @@ An MIT-licensed **TypeScript framework and package ecosystem for enterprise B2B 
 | [strutvane-ui](https://github.com/vishwajit-vm/strutvane-ui) | `@strutvane/ui` | Metadata-driven UI: tables, forms, detail pages, auth screens, themes |
 | [strutvane-cli](https://github.com/vishwajit-vm/strutvane-cli) | `strutvane`, `@strutvane/cli` | Unified CLI |
 | [strutvane-devkit](https://github.com/vishwajit-vm/strutvane-devkit) | `@strutvane/devkit` | SDK for installers, generators, plugins |
+| [strutvane-logs](https://github.com/vishwajit-vm/strutvane-logs) | `@strutvane/logs` | Zero-config logging: redaction, retention, request logging, built-in viewer at `/_strutvane/logs`. **Installed by default** (RFC-0004). |
 | [create-strutvane](https://github.com/vishwajit-vm/create-strutvane) | `create-strutvane` | Project starter (presets: full, api, ui) |
 | [strutvane-tooling](https://github.com/vishwajit-vm/strutvane-tooling) | — | Canonical configs, CI/release workflows, config sync (this file comes from here) |
 | [strutvane-docs](https://github.com/vishwajit-vm/strutvane-docs) | — | Friendly public docs site |
 
-Planned: `@strutvane/files` (RFC-0002), then notify, logs, reports, payments/billing, analytics.
+Planned: `@strutvane/files` (RFC-0002), then notify, reports, payments/billing, analytics.
 
 **Local layout:** the hub folder contains every other repo under `packages/<name>/`. Hub paths such as `../../docs/...` only exist in that layout. If you cloned a single repo, use the online links below instead.
 
@@ -40,7 +41,7 @@ Planned: `@strutvane/files` (RFC-0002), then notify, logs, reports, payments/bil
 
 | Topic | Hub path | Online |
 |---|---|---|
-| Canonical decisions D1–D23 | `docs/00-executive-summary.md` | [link](https://github.com/vishwajit-vm/strutvane/blob/main/docs/00-executive-summary.md) |
+| Canonical decisions D1–D24 | `docs/00-executive-summary.md` | [link](https://github.com/vishwajit-vm/strutvane/blob/main/docs/00-executive-summary.md) |
 | Developer experience contract | `docs/05-developer-experience.md` | [link](https://github.com/vishwajit-vm/strutvane/blob/main/docs/05-developer-experience.md) |
 | How packages connect (the only allowed connections) | `docs/17-integration-map.md` | [link](https://github.com/vishwajit-vm/strutvane/blob/main/docs/17-integration-map.md) |
 | Architecture decision records | `docs/adr/` | [link](https://github.com/vishwajit-vm/strutvane/tree/main/docs/adr) |
@@ -48,15 +49,16 @@ Planned: `@strutvane/files` (RFC-0002), then notify, logs, reports, payments/bil
 | Roadmap and current phase | `docs/14-roadmap.md` | [link](https://github.com/vishwajit-vm/strutvane/blob/main/docs/14-roadmap.md) |
 | Security model | `docs/12-security-model.md` | [link](https://github.com/vishwajit-vm/strutvane/blob/main/docs/12-security-model.md) |
 
-**Precedence:** the executive summary (D1–D23) and accepted ADRs win over everything, including this file and any repo's own docs. If you find a conflict, report it. Don't silently pick one.
+**Precedence:** the executive summary (D1–D24) and accepted ADRs win over everything, including this file and any repo's own docs. If you find a conflict, report it. Don't silently pick one.
 
 ## 4. Architecture rules (non-negotiable)
 
 1. **Dependency direction:** `contracts` ← `core` ← product packages (`framework`, `auth`, `ui`, `files`, …). **Product packages never import each other.**
 2. **The only allowed connections** between packages are the six in the integration map: contracts (types), container tokens, hooks, domain events, installer `enhances`, and HTTP + manifest. A new connection is added to the map in the same PR.
 3. **Every package works alone and installs itself completely** (config, `.env` + `.env.example`, migrations, routes, screens) through the installer protocol. Install order never changes the result.
-4. **One error model:** RFC 9457 `Problem` with a stable `code` and structured `issues`. Messages come from catalogs, never hard-coded (RFC-0003).
-5. **Security by default:**
+4. **Logging:** log only through the `Logger` contract (`@strutvane/logs` by default; core fallback). Never use `console.*` in package code. Never log secrets or request bodies by default (RFC-0004).
+5. **One error model:** RFC 9457 `Problem` with a stable `code` and structured `issues`. Messages come from catalogs, never hard-coded (RFC-0003).
+6. **Security by default:**
    - deny-by-default authorization
    - tenancy enforced by Postgres RLS under the five rules of ADR-0007
    - two-valued NULL-safe policy semantics (ADR-0008)
@@ -74,6 +76,11 @@ Planned: `@strutvane/files` (RFC-0002), then notify, logs, reports, payments/bil
   - always clean up (connections, temp files)
   - make every retry idempotent
 - **Tests are part of the change.** Every behaviour has unit tests. Data logic is tested against real engines (no mocks for SQL). Public types get type-level tests that prove misuse fails to compile. Coverage thresholds: 90/90/85/90.
+- **Security is tested continuously (VAPT).**
+  - Write a threat model before code, and attack-style tests for your package's surface (tenancy, injection, uploads, sessions, enumeration, rate limits).
+  - Fuzz every parser.
+  - Every security fix ships with a regression test for the whole class.
+  - See the hub `docs/13-testing-strategy.md` §14.
 - **Never edit synced files** (`tsconfig.base.json`, `biome.base.json`, `vitest.shared.ts`, `.github/workflows/*`, `.gitattributes`, `.editorconfig`, `.claude/ECOSYSTEM.md`, shared agents/skills). Change them in strutvane-tooling.
 
 ## 6. Workflow
@@ -93,10 +100,10 @@ Planned: `@strutvane/files` (RFC-0002), then notify, logs, reports, payments/bil
   - tooling (configs, CI, sync)
   - contracts v0 (implemented and tested, not released)
   - docs site
-  - spikes 01–03 (migrations, policy → SQL, RLS) → ADR-0007/0008/0009
-  - RFC-0002 (files) and RFC-0003 (errors & messages) drafted
-- **Next:** spikes for the registry compiler, OpenAPI client, three-way merge, Better Auth adapter and UI renderer, then Phase 1 (core, CLI, framework).
-- **npm:** all `@strutvane/*` names are reserved with placeholder versions. Nothing is released yet.
+  - spikes 01–08 (375 tests: migrations, policy → SQL, RLS, registry compiler, OpenAPI client, three-way merge, Better Auth adapter, UI renderer) → ADR-0007 to ADR-0014
+  - RFC-0002 (files), RFC-0003 (errors & messages) and RFC-0004 (`@strutvane/logs`) drafted
+- **Next:** spike 09 (logger throughput, RFC-0004), GOVERNANCE.md, then Phase 1: core, CLI, framework and `@strutvane/logs`.
+- **npm:** `@strutvane/{contracts,core,framework,auth,ui,cli,devkit,logs}`, `strutvane` and `create-strutvane` are reserved with placeholder versions. Nothing is released yet.
 
 ## 8. Contributor quick start (human or AI)
 
