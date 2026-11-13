@@ -7,18 +7,38 @@
  * - the **framework** compiles the tree to SQL, and **auth** evaluates it in memory for one record.
  *
  * Because both the SQL path and the in-memory path read the same tree, they must agree. That
- * requires one shared definition of NULL behaviour, written down below and tested in every
- * evaluator.
+ * requires one shared definition of NULL behaviour, written down below and enforced in every
+ * evaluator by a property-based equivalence test (Phase 0 spike 02: 43,930 comparisons, 0
+ * mismatches).
  *
- * ## NULL semantics (normative)
- * Evaluators MUST follow SQL's rules, so that in-memory checks match database results:
- * - A comparison (`eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `in`, `nin`, `between`, text operators)
- *   where the field value is `null` is **not satisfied**. So `ne` does NOT match rows whose field
- *   is null.
- * - `isNull` / `isNotNull` are the only operators that match on null.
- * - `not` of an unsatisfied comparison on a null field is **also unsatisfied** (three-valued
- *   logic: NOT UNKNOWN = UNKNOWN). Evaluators therefore track TRUE / FALSE / UNKNOWN internally.
- * - `null` is not allowed as a comparison value. Use `isNull` instead. The types forbid it.
+ * ## Semantics (normative): two-valued and NULL-safe
+ * Every operator yields exactly `true` or `false`, never "unknown", so `not` is a plain negation
+ * in both paths. With `v` the field value:
+ * - `eq`: `true` only when `v` is non-null and equal. `ne` is the exact negation of `eq`, so
+ *   **`ne` matches rows whose field is null**. (This makes `deny … when status ne 'paid'` protect
+ *   rows with no status, where SQL's native `<>` would silently skip them.)
+ * - `gt`, `gte`, `lt`, `lte`, `between`: `false` when `v` is null. Only allowed on numeric (and,
+ *   later, temporal) fields, because text ordering depends on database collation.
+ * - `in`: `true` when `v` is non-null and equals a listed value. `nin` is its exact negation
+ *   (so it matches null). An empty list makes `in` false and `nin` true.
+ * - `contains`, `startsWith`, `endsWith`: `false` when `v` is null; the search text is matched
+ *   literally (`%` and `_` are not wildcards).
+ * - `isNull` / `isNotNull` test for null directly.
+ * - `null` is not allowed as a comparison value. Use `isNull` instead (the types forbid it).
+ *
+ * ## Actor references (normative, security)
+ * {@link ActorRef}s are replaced by the actor's values *before* evaluation or SQL compilation:
+ * - If the actor's value is `null`, `eq` becomes `false`, `ne` becomes `true`, and the value is
+ *   dropped from `in` / `nin` lists. A null actor attribute must never match null rows (otherwise
+ *   "same region as me" would grant every row without a region to an actor without a region).
+ * - If the actor attribute is missing (`undefined`), evaluation MUST throw. Identity providers
+ *   must set every attribute that policies reference, explicitly, even if to `null`.
+ *
+ * ## Fail closed
+ * Inputs the two paths could disagree on are rejected identically by both: unknown fields, a value
+ * whose type does not match the field, ordering on non-numeric fields, and strings containing
+ * U+0000. When evaluating in memory, a field missing from the record (not loaded) throws rather
+ * than being read as null.
  *
  * @module
  */
@@ -29,7 +49,7 @@
  */
 export type FieldPath = string
 
-/** A literal value that can be compared. `null` is deliberately excluded (see NULL semantics). */
+/** A literal value that can be compared. `null` is deliberately excluded (use `isNull`). */
 export type FilterScalar = string | number | boolean
 
 /**
@@ -77,7 +97,7 @@ export interface OrFilter {
   readonly filters: readonly QueryFilter[]
 }
 
-/** Negation, using three-valued logic (see NULL semantics). */
+/** Plain negation (semantics are two-valued, so `not` never has to handle "unknown"). */
 export interface NotFilter {
   readonly op: 'not'
   readonly filter: QueryFilter
