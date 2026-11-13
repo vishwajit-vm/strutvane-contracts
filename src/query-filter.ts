@@ -75,7 +75,10 @@ export type ComparisonOperator = 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte'
 export type SetOperator = 'in' | 'nin'
 /** Null checks. */
 export type NullOperator = 'isNull' | 'isNotNull'
-/** Text matching. */
+/**
+ * Text matching. Case-insensitive matching folds ASCII letters A–Z only, so in-memory evaluation
+ * and SQL agree regardless of database locale or collation (decided in @strutvane/auth 0.1).
+ */
 export type TextOperator = 'contains' | 'startsWith' | 'endsWith'
 /** Every operator a field can be filtered with (`between` included). */
 export type FilterOperator =
