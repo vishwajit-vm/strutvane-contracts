@@ -61,7 +61,7 @@ export interface PermissionProvider {
    *
    * Optional, so simple providers stay simple. When a provider omits it, the framework falls back
    * to its own client-queryable fields (which already exclude `hidden` fields). When present, the
-   * framework intersects the two and rejects any other field with `invalid_filter`.
+   * framework intersects the two and rejects any other field (`filter_not_allowed` / `sort_not_allowed`).
    */
   filterableFields?(actor: Actor | null, resourceType: string): Promise<ReadonlySet<string>>
 }
