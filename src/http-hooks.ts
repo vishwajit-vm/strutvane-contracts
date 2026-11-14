@@ -37,9 +37,10 @@ export interface HttpRequestHookPayload {
   readonly tenant: TenantContext | undefined
   /**
    * The address of the directly connected peer (the TCP socket's remote address), when the server
-   * knows it. It is never read from request headers such as `X-Forwarded-For`, because any client
-   * can set those. Security controls keyed by client address (per-IP rate limits, IP allow-lists)
-   * must use this field; when it is `undefined` they must fail closed (for example, fall back to a
+   * knows it. It is never taken from request headers such as `X-Forwarded-For`, because any client
+   * can set those, unless the app explicitly trusts a proxy it controls (framework `trustProxy`).
+   * Security controls keyed by client address (per-IP rate limits, IP allow-lists) must use this
+   * field; when it is `undefined` they must fail closed (for example, fall back to a
    * shared global limit) rather than skip the check.
    */
   readonly clientAddress?: string
