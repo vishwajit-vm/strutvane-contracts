@@ -53,4 +53,15 @@ export interface PermissionProvider {
    * than what {@link PermissionProvider.can} would allow for each individual record.
    */
   filterFor(actor: Actor | null, action: Permission, resourceType: string): Promise<QueryFilter>
+
+  /**
+   * The fields of `resourceType` that `actor` may filter, sort and search on. This should equal the
+   * fields the actor may read: allowing a filter on a field the actor cannot read would let them
+   * infer its values from which records match.
+   *
+   * Optional, so simple providers stay simple. When a provider omits it, the framework falls back
+   * to its own client-queryable fields (which already exclude `hidden` fields). When present, the
+   * framework intersects the two and rejects any other field with `invalid_filter`.
+   */
+  filterableFields?(actor: Actor | null, resourceType: string): Promise<ReadonlySet<string>>
 }

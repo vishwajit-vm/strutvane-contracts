@@ -102,6 +102,17 @@ describe('Actor and PermissionProvider', () => {
     >().toEqualTypeOf<QueryFilter>()
   })
 
+  test('filterableFields is optional and returns a read-only set', () => {
+    const minimal: PermissionProvider = {
+      can: async () => ({ allowed: false, reason: 'default-deny' }),
+      filterFor: async () => ({ op: 'false' }),
+    }
+    void minimal
+    type Fn = NonNullable<PermissionProvider['filterableFields']>
+    expectTypeOf<Awaited<ReturnType<Fn>>>().toEqualTypeOf<ReadonlySet<string>>()
+    expectTypeOf<Fn>().parameter(0).toEqualTypeOf<Actor | null>()
+  })
+
   test('actor collections are readonly (no accidental mutation of the current actor)', () => {
     expectTypeOf<Actor['roles']>().toEqualTypeOf<readonly string[]>()
   })
