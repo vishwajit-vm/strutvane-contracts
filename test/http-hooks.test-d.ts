@@ -39,6 +39,10 @@ describe('HttpResponseHookPayload', () => {
     expectTypeOf<HttpResponseHookPayload['status']>().toEqualTypeOf<number>()
     expectTypeOf<HttpResponseHookPayload['requestId']>().toEqualTypeOf<string>()
   })
+
+  test('route is an optional template string (absent for unmatched requests)', () => {
+    expectTypeOf<HttpResponseHookPayload['route']>().toEqualTypeOf<string | undefined>()
+  })
 })
 
 describe('HTTP_HOOKS', () => {

@@ -52,4 +52,11 @@ export interface HttpResponseHookPayload {
   readonly request: Request
   readonly status: number
   readonly requestId: string
+  /**
+   * The matched route template (e.g. `/api/v1/invoices/:id`), when the router knows it. Request
+   * loggers should prefer it over the raw path: it groups requests usefully and never contains
+   * path-embedded tokens or ids. `undefined` for unmatched requests (404s) and for hook-answered
+   * requests without a template.
+   */
+  readonly route?: string
 }
